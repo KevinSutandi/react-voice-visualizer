@@ -65,6 +65,7 @@ interface VoiceVisualizerProps {
   isAudioProcessingTextShown?: boolean;
   audioProcessingTextClassName?: string;
   controlButtonsClassName?: string;
+  deviceId?: string;
 }
 
 const VoiceVisualizer = ({

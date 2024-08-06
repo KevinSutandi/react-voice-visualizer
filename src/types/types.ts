@@ -30,6 +30,8 @@ export interface Controls {
   saveAudioFile: () => void;
   clearCanvas: () => void;
   setCurrentAudioTime: Dispatch<SetStateAction<number>>;
+  audioDevices: MediaDeviceInfo[];
+  selectedDeviceId: string | null;
   error: Error | null;
   isProcessingOnResize: boolean;
   isProcessingStartRecording: boolean;

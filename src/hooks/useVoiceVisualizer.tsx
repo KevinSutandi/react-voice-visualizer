@@ -41,6 +41,8 @@ function useVoiceVisualizer({
   const [error, setError] = useState<Error | null>(null);
   const [isProcessingStartRecording, setIsProcessingStartRecording] =
     useState(false);
+  const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -100,6 +102,24 @@ function useVoiceVisualizer({
     };
   }, [isCleared]);
 
+  useEffect(() => {
+    const fetchAudioDevices = async () => {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioInputDevices = devices.filter(device => device.kind === 'audioinput');
+        setAudioDevices(audioInputDevices);
+        if (audioInputDevices.length > 0) {
+          setSelectedDeviceId(audioInputDevices[0].deviceId);
+        }
+      } catch (error) {
+        console.error('Error fetching audio devices:', error);
+      }
+    };
+
+    void fetchAudioDevices();
+  }, []);
+
+
   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
     e.preventDefault();
     e.returnValue = "";
@@ -151,7 +171,10 @@ function useVoiceVisualizer({
     setIsProcessingStartRecording(true);
 
     navigator.mediaDevices
-      .getUserMedia({ audio: true })
+      .getUserMedia({ audio: {
+        deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
+        }
+      })
       .then((stream) => {
         setIsCleared(false);
         setIsProcessingStartRecording(false);
@@ -215,6 +238,7 @@ function useVoiceVisualizer({
     if (!isCleared) clearCanvas();
     getUserMedia();
   };
+
 
   const stopRecording = () => {
     if (!isRecordingInProgress) return;
@@ -378,6 +402,8 @@ function useVoiceVisualizer({
   };
 
   return {
+    audioDevices,
+    selectedDeviceId,
     audioRef,
     isRecordingInProgress,
     isPausedRecording,
