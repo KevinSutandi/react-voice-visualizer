@@ -263,6 +263,14 @@ function useVoiceVisualizer({
     if (onStopRecording) onStopRecording();
   };
 
+  const changeDevice = (deviceId: string) => {
+    setSelectedDeviceId(deviceId);
+    if (isRecordingInProgress) {
+      stopRecording();  // Stop the current recording
+      startRecording(); // Start recording with the new device
+    }
+  };
+
   const clearCanvas = () => {
     if (rafRecordingRef.current) {
       cancelAnimationFrame(rafRecordingRef.current);
@@ -404,6 +412,7 @@ function useVoiceVisualizer({
   return {
     audioDevices,
     selectedDeviceId,
+    changeDevice,
     audioRef,
     isRecordingInProgress,
     isPausedRecording,

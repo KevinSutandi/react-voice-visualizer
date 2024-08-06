@@ -32,6 +32,7 @@ export interface Controls {
   setCurrentAudioTime: Dispatch<SetStateAction<number>>;
   audioDevices: MediaDeviceInfo[];
   selectedDeviceId: string | null;
+  changeDevice: (deviceId: string) => void;
   error: Error | null;
   isProcessingOnResize: boolean;
   isProcessingStartRecording: boolean;
