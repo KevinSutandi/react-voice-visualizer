@@ -1,14 +1,14 @@
 {
-  "name": "react-voice-visualizer",
+  "name": "react-voice-visualizer-with-device-pick",
   "private": false,
-  "version": "2.0.2",
+  "version": "1.0",
   "type": "module",
-  "author": "Yurii Zarytskyi",
+  "author": "Yurii Zarytskyi & Kevin Sutandi",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YZarytskyi/react-voice-visualizer.git"
+    "url": "git+https://github.com/KevinSutandi/react-voice-visualizer.git"
   },
-  "description": "React library for audio recording and visualization using Web Audio API",
+  "description": "React library for audio recording and visualization using Web Audio API forked by Yurii Zaritskyi, with device picker",
   "license": "MIT",
   "keywords": [
     "audio",
@@ -74,7 +74,7 @@
     "vite-plugin-dts": "^3.5.3"
   },
   "bugs": {
-    "url": "https://github.com/YZarytskyi/react-voice-visualizer/issues"
+    "url": "https://github.com/KevinSutandi/react-voice-visualizer/issues"
   },
-  "homepage": "https://github.com/YZarytskyi/react-voice-visualizer#readme"
+  "homepage": "https://github.com/KevinSutandi/react-voice-visualizer#readme"
 }
