@@ -555,7 +555,7 @@ const VoiceVisualizer = ({
             )}
             {isCleared && (
               <button
-                className={`voice-visualizer__btn-center relative ${
+                className={`voice-visualizer__btn-center voice-visualizer__relative ${
                   isProcessingStartRecording
                     ? "voice-visualizer__btn-center--border-transparent"
                     : ""
@@ -564,8 +564,8 @@ const VoiceVisualizer = ({
                 disabled={isProcessingStartRecording}
               >
                 {isProcessingStartRecording && (
-                  <div className="spinner__wrapper">
-                    <div className="spinner" />
+                  <div className="voice-visualizer__spinner-wrapper">
+                    <div className="voice-visualizer__spinner" />
                   </div>
                 )}
                 <img src={microphoneIcon} alt="Microphone" />
