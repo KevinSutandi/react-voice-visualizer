@@ -19,6 +19,7 @@ function useVoiceVisualizer({
   onPausedAudioPlayback,
   onResumedAudioPlayback,
   onErrorPlayingAudio,
+                              onDeviceChange,
 }: useVoiceVisualizerParams = {}): Controls {
   const [isRecordingInProgress, setIsRecordingInProgress] = useState(false);
   const [isPausedRecording, setIsPausedRecording] = useState(false);
@@ -62,6 +63,18 @@ function useVoiceVisualizer({
     formatRecordedAudioTime(currentAudioTime);
   const isProcessingRecordedAudio =
     isProcessingOnResize || isProcessingAudioOnComplete;
+
+  const getBrowserInfo = () => {
+    const userAgent = navigator.userAgent.toLowerCase();
+
+    return {
+      isSafari: /^((?!chrome|android).)*safari/i.test(userAgent),
+      isFirefox: userAgent.indexOf('firefox') > -1,
+      isChrome: userAgent.indexOf('chrome') > -1,
+      isEdge: userAgent.indexOf('edg') > -1
+    };
+  };
+
 
   useEffect(() => {
     if (!isRecordingInProgress || isPausedRecording) return;
@@ -263,11 +276,79 @@ function useVoiceVisualizer({
     if (onStopRecording) onStopRecording();
   };
 
-  const changeDevice = (deviceId: string) => {
-    setSelectedDeviceId(deviceId);
-    if (isRecordingInProgress) {
-      stopRecording();  // Stop the current recording
-      startRecording(); // Start recording with the new device
+  const changeDevice = async (deviceId: string) => {
+    const { isSafari } = getBrowserInfo();
+
+    try {
+      setSelectedDeviceId(deviceId);
+
+      // If recording is in progress, we need to handle the transition carefully
+      if (isRecordingInProgress) {
+        // First stop the current recording and clean up
+        if (mediaRecorderRef.current) {
+          mediaRecorderRef.current.removeEventListener('dataavailable', handleDataAvailable);
+          mediaRecorderRef.current.stop();
+          mediaRecorderRef.current = null;
+        }
+
+        // Stop all current tracks
+        if (audioStream) {
+          audioStream.getTracks().forEach(track => track.stop());
+        }
+
+        // Clean up audio context if it exists
+        if (sourceRef.current) {
+          sourceRef.current.disconnect();
+        }
+
+        // Get new stream with the selected device
+        const newStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            deviceId: { exact: deviceId }
+          }
+        });
+
+        // Update the stream
+        setAudioStream(newStream);
+
+        // Small delay to ensure proper cleanup and initialization
+        if (isSafari) {
+          await new Promise(resolve => setTimeout(resolve, 200)); // Longer delay for Safari
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        // Reinitialize audio context and analyzer
+        audioContextRef.current = new window.AudioContext();
+        analyserRef.current = audioContextRef.current.createAnalyser();
+        dataArrayRef.current = new Uint8Array(analyserRef.current.frequencyBinCount);
+        sourceRef.current = audioContextRef.current.createMediaStreamSource(newStream);
+        sourceRef.current.connect(analyserRef.current);
+
+        // Create new media recorder
+        mediaRecorderRef.current = new MediaRecorder(newStream);
+        mediaRecorderRef.current.addEventListener('dataavailable', handleDataAvailable);
+
+        // Start recording with new device
+        mediaRecorderRef.current.start();
+
+        // Restart visualization
+        recordingFrame();
+      }
+
+      // Call onDeviceChange with success
+      if (onDeviceChange) {
+        onDeviceChange(deviceId, true);
+      }
+
+    } catch (error) {
+      console.error('Error changing audio device:', error);
+      setError(error instanceof Error ? error : new Error('Error changing audio device'));
+
+      // Call onDeviceChange with failure
+      if (onDeviceChange) {
+        onDeviceChange(deviceId, false);
+      }
     }
   };
 

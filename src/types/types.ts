@@ -6,6 +6,9 @@ export interface BarItem {
 }
 
 export interface Controls {
+  audioDevices: MediaDeviceInfo[];
+  selectedDeviceId: string | null;
+  changeDevice: (deviceId: string) => Promise<void>;
   audioRef: MutableRefObject<HTMLAudioElement | null>;
   isRecordingInProgress: boolean;
   isPausedRecording: boolean;
@@ -30,9 +33,6 @@ export interface Controls {
   saveAudioFile: () => void;
   clearCanvas: () => void;
   setCurrentAudioTime: Dispatch<SetStateAction<number>>;
-  audioDevices: MediaDeviceInfo[];
-  selectedDeviceId: string | null;
-  changeDevice: (deviceId: string) => void;
   error: Error | null;
   isProcessingOnResize: boolean;
   isProcessingStartRecording: boolean;
@@ -120,6 +120,7 @@ export interface useVoiceVisualizerParams {
   onPausedAudioPlayback?: () => void;
   onResumedAudioPlayback?: () => void;
   onErrorPlayingAudio?: (error: Error) => void;
+  onDeviceChange?: (deviceId: string, success: boolean) => void;
 }
 
 export interface UseWebWorkerParams<T> {
